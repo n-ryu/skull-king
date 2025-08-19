@@ -154,7 +154,7 @@ const SkullKing: React.FC = () => {
     return (value + 1) > max ? 0 : value + 1;
   };
 
-  const updatePlayerScore = (playerIndex: number, field: keyof PlayerScore) => {
+  const updatePlayerScore = (playerIndex: number, field: keyof PlayerScore, value?: number) => {
     const updatedRounds = [...rounds];
     const round = updatedRounds[currentRoundIndex];
     const player = round.playerScores[playerIndex];
@@ -162,10 +162,14 @@ const SkullKing: React.FC = () => {
     const maxValue = round.roundNumber;
 
     if (field === 'bid' || field === 'tricks') {
-      if (player[field] === null) {
-        player[field] = 0;
+      if(value !== undefined) {
+        player[field] = value;
       } else {
-        player[field] = cycleValue(player[field], maxValue);
+        if (player[field] === null) {
+          player[field] = 0;
+        } else {
+          player[field] = cycleValue(player[field], maxValue);
+        }
       }
     }
 
@@ -392,16 +396,27 @@ const SkullKing: React.FC = () => {
                 <span className="font-bold">{playerScore.name}</span>
                 <span className="font-bold">Score: {playerScore.score} / {calculateTotal(playerIndex)}</span>
               </div>
-              <div className="flex justify-between mb-1">
-                <Button onClick={() => updatePlayerScore(playerIndex, 'bid')} className="text-xs px-2 py-1 flex-1 mr-1">
-                  Bid: <span className="font-bold ml-1 text-sm">{playerScore.bid === null ? '' : playerScore.bid}</span>
-                </Button>
-                <Button onClick={() => updatePlayerScore(playerIndex, 'tricks')}
-                  className="text-xs px-2 py-1 flex-1 ml-1"
-                  disabled={shouldDisableTricks(playerScore)}
-                >
-                  Tricks: <span className="font-bold ml-1 text-sm">{playerScore.tricks === null ? '' : playerScore.tricks}</span>
-                </Button>
+              <div className="flex flex-col mb-1">
+                <div className='grid grid-cols-[85px_repeat(auto-fit,_minmax(10px,_1fr))]'>
+                  <div className='text-sm mx-[10px]'>Bids</div>
+                  {new Array(currentRoundIndex + 2).fill(0).map((_, i) => (
+                    <label className='border border-gray-300 w-full stretch rounded-md has-[:checked]:bg-black has-[:checked]:text-white  hover:bg-gray-500'>
+                      <input className='hidden' type='radio' name={`${playerIndex}-bid`} value={i} checked={playerScore.bid === i} onChange={() => updatePlayerScore(playerIndex, 'bid', i)}/>
+                      <span>{i}</span>
+                    </label>
+                    ))
+                  }
+                </div>
+                <div className='grid grid-cols-[85px_repeat(auto-fit,_minmax(10px,_1fr))]'>
+                  <div className='text-sm mx-[10px]'>Tricks</div>
+                  {new Array(currentRoundIndex + 2).fill(0).map((_, i) => (
+                    <label className='border border-gray-300 w-full stretch rounded-md has-[:checked]:bg-black has-[:checked]:text-white  hover:bg-gray-500'>
+                      <input className='hidden' type='radio' name={`${playerIndex}-tricks`} value={i} checked={playerScore.tricks === i} onChange={() => updatePlayerScore(playerIndex, 'tricks', i)}/>
+                      <span>{i}</span>
+                    </label>
+                    ))
+                  }
+                </div>
               </div>
               <div className="grid grid-cols-4 gap-1">
                 {specialCards.map(card => (
@@ -477,3 +492,4 @@ const SkullKing: React.FC = () => {
 };
 
 export default SkullKing;
+
